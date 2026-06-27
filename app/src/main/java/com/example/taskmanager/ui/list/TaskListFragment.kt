@@ -17,12 +17,19 @@ import com.example.taskmanager.viewmodel.TaskListViewModel
 import kotlinx.coroutines.launch
 
 /**
- * Screen 1 — Task List
- * Edge-to-Edge is enabled here.
- * Supports both portrait and landscape (ViewModel holds state).
+ * Screen 1 - Task List.
+ *
+ * Displays all tasks in a RecyclerView and provides a FAB to create new tasks.
+ * This screen is Edge-to-Edge: it draws behind the system bars and applies
+ * window insets as padding so content is never obscured.
+ *
+ * Orientation changes are handled automatically because all state lives in
+ * [TaskListViewModel], which survives configuration changes.
  */
 class TaskListFragment : Fragment() {
 
+    // _binding is nulled in onDestroyView to avoid holding a reference to
+    // the destroyed view hierarchy and prevent memory leaks.
     private var _binding: FragmentTaskListBinding? = null
     private val binding get() = _binding!!
 
@@ -40,14 +47,15 @@ class TaskListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ── Edge-to-Edge insets handling ──────────────────────────────────────
+        // Apply system bar insets so the content respects the status bar and
+        // navigation bar heights. This is required for Edge-to-Edge layouts.
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        // ── RecyclerView ──────────────────────────────────────────────────────
+        // Set up the adapter with click callbacks delegated to the ViewModel.
         adapter = TaskAdapter(
             onItemClick = { task ->
                 val action = TaskListFragmentDirections
@@ -58,18 +66,22 @@ class TaskListFragment : Fragment() {
         )
         binding.recyclerView.adapter = adapter
 
-        // ── FAB ───────────────────────────────────────────────────────────────
+        // FAB navigates to the form in create mode (taskId = -1 signals new task).
         binding.fabAdd.setOnClickListener {
             val action = TaskListFragmentDirections
                 .actionTaskListFragmentToTaskFormFragment(-1L)
             findNavController().navigate(action)
         }
 
-        // ── Observe tasks ─────────────────────────────────────────────────────
+        // Collect the task list only while the fragment is at least STARTED.
+        // repeatOnLifecycle cancels the inner block when the lifecycle drops
+        // below STARTED and re-launches it when it returns, preventing updates
+        // to a fragment that is in the back stack.
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.tasks.collect { tasks ->
                     adapter.submitList(tasks)
+                    // Show the empty state view only when there are no tasks.
                     binding.emptyState.visibility =
                         if (tasks.isEmpty()) View.VISIBLE else View.GONE
                 }

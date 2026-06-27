@@ -16,8 +16,11 @@ import com.example.taskmanager.viewmodel.TaskDetailViewModel
 import kotlinx.coroutines.launch
 
 /**
- * Screen 2 — Task Details
- * Back navigation provided by MainActivity's setupActionBarWithNavController.
+ * Screen 2 - Task Details.
+ *
+ * Shows all fields of a single task and provides buttons to edit or delete it.
+ * The Back button in the Toolbar is wired up by MainActivity via
+ * setupActionBarWithNavController, so no additional navigation code is needed here.
  */
 class TaskDetailFragment : Fragment() {
 
@@ -37,15 +40,20 @@ class TaskDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Observe the task and populate the UI whenever data changes.
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.task.collect { task ->
+                    // Return early if the task has not loaded yet.
                     task ?: return@collect
+
                     binding.tvTitle.text = task.title
                     binding.tvDescription.text = task.description
                     binding.tvType.text = try {
                         TaskType.valueOf(task.type).displayName
-                    } catch (e: IllegalArgumentException) { task.type }
+                    } catch (e: IllegalArgumentException) {
+                        task.type
+                    }
                     binding.tvPriority.text = "Priority: ${task.priority}"
                     binding.tvDeadline.text = task.deadline ?: "No deadline"
                     binding.tvStatus.text = if (task.isDone) "Done" else "In progress"
@@ -53,6 +61,7 @@ class TaskDetailFragment : Fragment() {
             }
         }
 
+        // Navigate to the form screen in edit mode, passing the current task ID.
         binding.btnEdit.setOnClickListener {
             val taskId = viewModel.task.value?.id ?: return@setOnClickListener
             val action = TaskDetailFragmentDirections
@@ -60,6 +69,7 @@ class TaskDetailFragment : Fragment() {
             findNavController().navigate(action)
         }
 
+        // Delete the task and navigate back to the list on the main thread.
         binding.btnDelete.setOnClickListener {
             viewModel.deleteTask {
                 requireActivity().runOnUiThread {

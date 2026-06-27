@@ -15,6 +15,15 @@ import com.example.taskmanager.databinding.FragmentDashboardBinding
 import com.example.taskmanager.viewmodel.TaskListViewModel
 import kotlinx.coroutines.launch
 
+/**
+ * The home screen of the application.
+ *
+ * Displays a summary of all tasks: total count, how many are done, and how
+ * many are still pending. Provides a button to navigate to the full task list.
+ *
+ * Reuses [TaskListViewModel] because it already exposes the same task stream
+ * needed for the statistics shown here.
+ */
 class DashboardFragment : Fragment() {
 
     private var _binding: FragmentDashboardBinding? = null
@@ -33,7 +42,7 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Observe task list and update stats
+        // Observe the task list and recompute stats on every emission.
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.tasks.collect { tasks ->
@@ -48,7 +57,7 @@ class DashboardFragment : Fragment() {
             }
         }
 
-        // Navigate to task list on button click
+        // Navigate to the task list screen when the button is tapped.
         binding.btnGoToTasks.setOnClickListener {
             findNavController().navigate(R.id.action_dashboard_to_taskList)
         }

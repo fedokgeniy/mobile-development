@@ -17,8 +17,12 @@ import com.example.taskmanager.viewmodel.TaskFormViewModel
 import kotlinx.coroutines.launch
 
 /**
- * Screen 3 — Create / Edit Task
- * In edit mode the type spinner is disabled (type is fixed after creation).
+ * Screen 3 - Create or Edit a Task.
+ *
+ * When opened with taskId = -1 the form is in create mode and all fields are blank.
+ * When opened with a valid taskId the form is in edit mode: existing values are
+ * pre-filled and the type spinner is disabled, enforcing the rule that a task's
+ * type cannot change after creation.
  */
 class TaskFormFragment : Fragment() {
 
@@ -38,7 +42,7 @@ class TaskFormFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Type spinner
+        // Populate the type spinner with the display names of all TaskType values.
         val types = TaskType.values().map { it.displayName }
         val spinnerAdapter = ArrayAdapter(
             requireContext(),
@@ -47,10 +51,11 @@ class TaskFormFragment : Fragment() {
         )
         binding.spinnerType.adapter = spinnerAdapter
 
-        // In edit mode — pre-fill fields and lock the type spinner
         if (viewModel.isEditMode) {
+            // Disable the spinner so the user cannot change the type during editing.
             binding.spinnerType.isEnabled = false
 
+            // Pre-fill all fields once the existing task is loaded from the database.
             viewLifecycleOwner.lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     viewModel.existingTask.collect { task ->
@@ -69,11 +74,14 @@ class TaskFormFragment : Fragment() {
 
         binding.btnSave.setOnClickListener {
             val title = binding.etTitle.text.toString().trim()
+
+            // Validate that the title field is not empty before saving.
             if (title.isEmpty()) {
                 binding.etTitle.error = "Title is required"
                 return@setOnClickListener
             }
 
+            // SeekBar ranges from 0 to 2, so add 1 to map to the 1-3 priority scale.
             val selectedType = TaskType.values()[binding.spinnerType.selectedItemPosition].name
             val priority = binding.seekBarPriority.progress + 1
             val deadline = binding.etDeadline.text.toString().trim().ifEmpty { null }
@@ -86,6 +94,8 @@ class TaskFormFragment : Fragment() {
                 deadline = deadline,
                 isDone = binding.cbDone.isChecked,
                 onSuccess = {
+                    // Navigate back on the main thread because the callback may
+                    // arrive from a background coroutine.
                     requireActivity().runOnUiThread {
                         findNavController().popBackStack()
                     }

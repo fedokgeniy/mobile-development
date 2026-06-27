@@ -1,8 +1,12 @@
 package com.example.taskmanager.model
 
 /**
- * Fixed task types — selected at creation, never changed on edit.
- * Stored as String in Room for simplicity.
+ * Represents the two fixed categories a task can belong to.
+ *
+ * The type is chosen when a task is created and cannot be changed when editing.
+ * It is persisted in the Room database as the enum constant name (e.g., "STUDY").
+ *
+ * @param displayName The human-readable label shown in the UI.
  */
 enum class TaskType(val displayName: String) {
     STUDY("Study"),
