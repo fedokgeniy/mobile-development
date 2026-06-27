@@ -41,11 +41,11 @@
         android:label="Task Form"
         tools:layout="@layout/fragment_task_form">
 
-        <!-- taskId == -1L means CREATE mode -->
+        <!-- taskId == -1L means CREATE mode; SafeArgs requires 'L' suffix for long literals -->
         <argument
             android:name="taskId"
             app:argType="long"
-            android:defaultValue="-1" />
+            android:defaultValue="-1L" />
     </fragment>
 
 </navigation>
