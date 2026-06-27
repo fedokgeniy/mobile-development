@@ -3,7 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/taskListFragment">
+    app:startDestination="@id/dashboardFragment">
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.example.taskmanager.ui.dashboard.DashboardFragment"
+        android:label="Task Manager"
+        tools:layout="@layout/fragment_dashboard">
+
+        <action
+            android:id="@+id/action_dashboard_to_taskList"
+            app:destination="@id/taskListFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/taskListFragment"
@@ -41,7 +52,6 @@
         android:label="Task Form"
         tools:layout="@layout/fragment_task_form">
 
-        <!-- taskId == -1L means CREATE mode; SafeArgs requires 'L' suffix for long literals -->
         <argument
             android:name="taskId"
             app:argType="long"
