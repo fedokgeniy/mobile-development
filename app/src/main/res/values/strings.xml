@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Task Manager</string>
+    <string name="screen_task_list">Tasks</string>
+    <string name="screen_task_detail">Task Details</string>
+    <string name="screen_task_form_create">New Task</string>
+    <string name="screen_task_form_edit">Edit Task</string>
+    <string name="empty_state">No tasks yet. Tap + to add one.</string>
+    <string name="type_study">Study</string>
+    <string name="type_personal">Personal</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_delete">Delete</string>
+    <string name="field_title">Title</string>
+    <string name="field_description">Description</string>
+    <string name="field_deadline">Deadline (YYYY-MM-DD, optional)</string>
+    <string name="field_priority">Priority (1–3)</string>
+    <string name="field_done">Mark as done</string>
+</resources>
